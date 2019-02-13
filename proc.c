@@ -534,9 +534,10 @@ procdump(void)
 }
 
 // BR
-void 
-info(void)
+int 
+info(int infotype)
 {
-  cprintf("\n\n Welcome to the kernel space! \n\n");
+  cprintf("\n\n Welcome to the %dth kernel space! \n\n", infotype);
+  return 0;
 }
 // BR

@@ -7,14 +7,18 @@
 #include "mmu.h"
 #include "proc.h"
 
-//BR
+//cs202
 int
 sys_info(void)
 {
-  info();
-  return 0;
+  int type;
+
+  if (argint(0, &type) < 0)
+    return -1;
+
+  return info(type);
 }
-//BR
+//cs202
 
 int
 sys_fork(void)
