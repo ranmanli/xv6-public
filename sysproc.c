@@ -7,6 +7,15 @@
 #include "mmu.h"
 #include "proc.h"
 
+//BR
+int
+sys_info(void)
+{
+  info();
+  return 0;
+}
+//BR
+
 int
 sys_fork(void)
 {

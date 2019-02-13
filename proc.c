@@ -532,3 +532,11 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+// BR
+void 
+info(void)
+{
+  cprintf("\n\n Welcome to the kernel space! \n\n");
+}
+// BR
