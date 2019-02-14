@@ -222,6 +222,7 @@ fork(void)
 
   // cs202
   np->pagecount = 0;
+  pagecount = 0;
   np->syscallcount = 0;
   // cs202
 
@@ -550,6 +551,7 @@ info(int infotype)
 
   int count = 0;
   struct proc *p;
+  struct proc *curproc = myproc();
 
   if(infotype == 1){
     acquire(&ptable.lock);
@@ -567,7 +569,6 @@ info(int infotype)
 
   if(infotype == 2){
 
-    struct proc *curproc = myproc();
 
     cprintf("\n\n system calls count: %d \n\n", curproc->syscallcount);
 
@@ -576,8 +577,10 @@ info(int infotype)
 
   if(infotype == 3){
 
-    cprintf("\n\n Welcome to the %dth kernel space! \n\n", infotype);
-    // cprintf("\n\n pages count: %d \n\n", pagecount);
+    int pagecount2 = curproc->sz / PGSIZE;
+
+    // cprintf("\n\n Welcome to the %dth kernel space! \n\n", infotype);
+    cprintf("\n\n pages count: %d \n\n", pagecount2);
 
     return 0;
   }
