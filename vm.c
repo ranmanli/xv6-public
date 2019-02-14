@@ -8,6 +8,9 @@
 #include "elf.h"
 
 extern char data[];  // defined by kernel.ld
+// cs202
+extern int pagecount; //defined by proc.c
+// cs202
 pde_t *kpgdir;  // for use in scheduler()
 
 // Set up CPU's kernel segment descriptors.

@@ -13,6 +13,10 @@ void freerange(void *vstart, void *vend);
 extern char end[]; // first address after kernel loaded from ELF file
                    // defined by the kernel linker script in kernel.ld
 
+// cs202
+extern int pagecount; //defined by proc.c
+// cs202
+
 struct run {
   struct run *next;
 };
@@ -74,6 +78,8 @@ kfree(char *v)
   kmem.freelist = r;
   if(kmem.use_lock)
     release(&kmem.lock);
+  
+  pagecount--;
 }
 
 // Allocate one 4096-byte page of physical memory.
@@ -82,6 +88,7 @@ kfree(char *v)
 char*
 kalloc(void)
 {
+
   struct run *r;
 
   if(kmem.use_lock)
@@ -91,6 +98,9 @@ kalloc(void)
     kmem.freelist = r->next;
   if(kmem.use_lock)
     release(&kmem.lock);
+
+  pagecount++;
+
   return (char*)r;
 }
 

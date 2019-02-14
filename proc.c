@@ -17,6 +17,7 @@ static struct proc *initproc;
 int nextpid = 1;
 // cs202
 int syscallcount = 0;
+int pagecount = 0;
 // cs202
 extern void forkret(void);
 extern void trapret(void);
@@ -561,10 +562,16 @@ info(int infotype)
 
   if(infotype == 2){
 
-    cprintf("\n\n system call count: %d \n\n", syscallcount);
+    cprintf("\n\n system calls count: %d \n\n", syscallcount);
 
     return 0;
+  }
 
+  if(infotype == 3){
+
+    cprintf("\n\n pages count: %d \n\n", pagecount);
+
+    return 0;
   }
 
   return -1;
