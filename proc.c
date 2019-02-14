@@ -18,7 +18,7 @@ int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
 
-int pagecount = 0;
+// int pagecount = 0;
 
 static void wakeup1(void *chan);
 
@@ -221,8 +221,8 @@ fork(void)
   release(&ptable.lock);
 
   // cs202
-  np->pagecount = 0;
-  pagecount = 0;
+  // np->pagecount = 0;
+  // pagecount = 0;
   np->syscallcount = 0;
   // cs202
 
@@ -577,10 +577,10 @@ info(int infotype)
 
   if(infotype == 3){
 
-    int pagecount2 = curproc->sz / PGSIZE;
+    int pagecount = curproc->sz / PGSIZE;
 
     // cprintf("\n\n Welcome to the %dth kernel space! \n\n", infotype);
-    cprintf("\n\n pages count: %d \n\n", pagecount2);
+    cprintf("\n\n pages count: %d \n\n", pagecount);
 
     return 0;
   }
