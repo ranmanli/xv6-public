@@ -15,6 +15,9 @@ struct {
 static struct proc *initproc;
 
 int nextpid = 1;
+// cs202
+int syscallcount = 0;
+// cs202
 extern void forkret(void);
 extern void trapret(void);
 
@@ -533,11 +536,37 @@ procdump(void)
   }
 }
 
-// BR
+// cs202
 int 
 info(int infotype)
 {
-  cprintf("\n\n Welcome to the %dth kernel space! \n\n", infotype);
-  return 0;
+  // cprintf("\n\n Welcome to the %dth kernel space! \n\n", infotype);
+
+  int count = 0;
+  struct proc *p;
+
+  if(infotype == 1){
+    acquire(&ptable.lock);
+
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+      if(p->state != UNUSED)
+        count++;
+
+    release(&ptable.lock);
+
+    cprintf("\n\nprocesses count: %d \n\n", count);
+
+    return 0;
+  }
+
+  if(infotype == 2){
+
+    cprintf("\n\n system call count: %d \n\n", syscallcount);
+
+    return 0;
+
+  }
+
+  return -1;
 }
-// BR
+// cs202
