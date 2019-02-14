@@ -140,7 +140,7 @@ syscall(void)
   struct proc *curproc = myproc();
 
   // cs202
-  syscallcount++;
+  curproc->syscallcount++;
   // cs202
 
   num = curproc->tf->eax;

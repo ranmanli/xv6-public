@@ -13,10 +13,6 @@ void freerange(void *vstart, void *vend);
 extern char end[]; // first address after kernel loaded from ELF file
                    // defined by the kernel linker script in kernel.ld
 
-// cs202
-extern int pagecount; //defined by proc.c
-// cs202
-
 struct run {
   struct run *next;
 };
@@ -78,11 +74,6 @@ kfree(char *v)
   kmem.freelist = r;
   if(kmem.use_lock)
     release(&kmem.lock);
-
-// cs202
-  if(pagecount > 0)
-    pagecount--;
-// cs202
   
 }
 
@@ -102,10 +93,6 @@ kalloc(void)
     kmem.freelist = r->next;
   if(kmem.use_lock)
     release(&kmem.lock);
-
-// cs202
-  pagecount++;
-// cs202
 
   return (char*)r;
 }

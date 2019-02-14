@@ -15,12 +15,10 @@ struct {
 static struct proc *initproc;
 
 int nextpid = 1;
-// cs202
-int syscallcount = 0;
-int pagecount = 0;
-// cs202
 extern void forkret(void);
 extern void trapret(void);
+
+int pagecount = 0;
 
 static void wakeup1(void *chan);
 
@@ -222,6 +220,11 @@ fork(void)
 
   release(&ptable.lock);
 
+  // cs202
+  np->pagecount = 0;
+  np->syscallcount = 0;
+  // cs202
+
   return pid;
 }
 
@@ -337,6 +340,7 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+
       if(p->state != RUNNABLE)
         continue;
 
@@ -345,7 +349,7 @@ scheduler(void)
       // before jumping back to us.
       c->proc = p;
 
-      
+
       switchuvm(p);
       p->state = RUNNING;
 
@@ -543,7 +547,6 @@ procdump(void)
 int 
 info(int infotype)
 {
-  // cprintf("\n\n Welcome to the %dth kernel space! \n\n", infotype);
 
   int count = 0;
   struct proc *p;
@@ -564,14 +567,17 @@ info(int infotype)
 
   if(infotype == 2){
 
-    cprintf("\n\n system calls count: %d \n\n", syscallcount);
+    struct proc *curproc = myproc();
+
+    cprintf("\n\n system calls count: %d \n\n", curproc->syscallcount);
 
     return 0;
   }
 
   if(infotype == 3){
 
-    cprintf("\n\n pages count: %d \n\n", pagecount);
+    cprintf("\n\n Welcome to the %dth kernel space! \n\n", infotype);
+    // cprintf("\n\n pages count: %d \n\n", pagecount);
 
     return 0;
   }
