@@ -16,6 +16,8 @@ struct {
 static struct proc *initproc;
 
 int nextpid = 1;
+//  cs202
+const int stride1 = (1<<20);
 extern void forkret(void);
 extern void trapret(void);
 
@@ -94,6 +96,8 @@ found:
   // cs202
   p->tickets = 10;
   p->syscallcount = 0;
+  p->stride = stride1 / p->tickets;
+  p->pass = p->stride;
   // cs202
 
 
@@ -330,7 +334,8 @@ wait(void)
 void
 scheduler(void)
 {
-  struct proc *p;
+  struct proc *p = initproc;
+  struct proc *tempp; // cs202 
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -339,13 +344,16 @@ scheduler(void)
     sti();
 
     // cs202
-    int tickcount = 0;  //the count of all ticket of processes
-    int ticksum = 0;  //the sum of tickets of checked processes
+    // lottery scheduling
+    // int tickcount = 0;  //the count of all ticket of processes
+    // int ticksum = 0;  //the sum of tickets of checked processes
 
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     
+    // lottery scheduling
+    /*
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if (p->state == RUNNABLE){
         tickcount += p->tickets;
@@ -353,7 +361,44 @@ scheduler(void)
     }
 
     long winner = random_at_most(tickcount);
+    
+    */
 
+    // stride schedulingL
+    int minpass = -1;
+
+    //p and tempp. need to run through the queue to find the minimal pass, but also keep the minimal record
+
+    for(tempp = ptable.proc; tempp < &ptable.proc[NPROC]; tempp++){
+      
+      if(tempp->state != RUNNABLE){
+        continue;
+      }
+
+      if( (minpass < 0) | (tempp->pass < minpass)){
+        minpass = tempp->pass;
+        p = tempp;
+      }
+      
+    }
+    // Switch to chosen process.  It is the process's job
+    // to release ptable.lock and then reacquire it
+    // before jumping back to us.
+    c->proc = p;
+
+
+    switchuvm(p);
+    p->state = RUNNING;
+
+    swtch(&(c->scheduler), p->context);
+    switchkvm();
+
+    // Process is done running for now.
+    // It should have changed its p->state before coming back.
+    c->proc = 0;
+
+    // lottery scheduling
+    /*
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 
       if(p->state != RUNNABLE)
@@ -361,10 +406,14 @@ scheduler(void)
 
       // cs202
 
+      
       ticksum += p->tickets;
 
       if(ticksum < winner)
         continue;
+      
+      
+
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
@@ -383,6 +432,8 @@ scheduler(void)
       c->proc = 0;
       break;
     }
+    */
+
     release(&ptable.lock);
 
   }
@@ -420,6 +471,7 @@ yield(void)
 {
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
+  myproc()->pass += myproc()->stride; // cs202
   sched();
   release(&ptable.lock);
 }
@@ -584,7 +636,7 @@ info(int infotype)
 
     release(&ptable.lock);
 
-    cprintf("\n\n  processes count: %d", count);
+    cprintf("\n  processes count: %d\n", count);
 
     return 0;
   }
@@ -592,7 +644,7 @@ info(int infotype)
   if(infotype == 2){
 
 
-    cprintf("\n\n  system calls count: %d", curproc->syscallcount);
+    cprintf("\n  system calls count: %d\n", curproc->syscallcount);
 
     return 0;
   }
@@ -602,7 +654,7 @@ info(int infotype)
     int pagecount = curproc->sz / PGSIZE;
 
     // cprintf("\n\n Welcome to the %dth kernel space! \n\n", infotype);
-    cprintf("\n\n  pages count: %d", pagecount);
+    cprintf("\n  pages count: %d\n", pagecount);
 
     return 0;
   }
@@ -617,8 +669,9 @@ settickets(int tickets)
   struct proc *curproc = myproc();
 
   curproc->tickets = tickets;
+  curproc->stride = stride1 / tickets;
 
-  cprintf("\n\n  assign %d tickets to current process", tickets);
+  cprintf("\n  assign %d tickets to current process\n", curproc->tickets);
 
   return 0;
 }

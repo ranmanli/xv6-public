@@ -53,6 +53,8 @@ struct proc {
   // int pagecount;
   int tickets;                 //tickets for scheduling
   int syscallcount;            //the count of system calls
+  int stride;                  //stride of process,inversely proportional to tickets
+  int pass;                    //indicate the time process has ran
   // cs202
 };
 
