@@ -34,7 +34,7 @@ int   Scheduler ( void ){
       info(1);
       info(2);
       info(3);
-      printf (1, "\n\n  child# %d with %d tickets has finished!\n", getpid(), tick);   
+      printf (1, "\n  child# %d with %d tickets has finished!\n", getpid(), tick);   
       exit ();
     }
     else  {
