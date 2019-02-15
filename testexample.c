@@ -24,15 +24,17 @@ int   Scheduler ( void ){
        continue ;
     }
     else if (pid == 0) {
-      tick = 200 - 30 * i;
+      tick = 30 - 10 * i;
       settickets (tick); 
       for(j = 0 ;j < 50000 ;j ++ ) {
-        for(k = 0 ;k < 50000 ;k ++ ) {
+        for(k = 0 ;k < 1000 ;k ++ ) {
           asm ( "nop" );
         }
       }
       info(1);
-      printf (1, " \n  child# %d with %d tickets has finished!  \n ", getpid(), tick);   
+      info(2);
+      info(3);
+      printf (1, "\n\n  child# %d with %d tickets has finished!\n", getpid(), tick);   
       exit ();
     }
     else  {

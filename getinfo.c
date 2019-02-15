@@ -16,7 +16,6 @@ int main(int argc, char *argv[])
 			exit();
 		}
 		info(type);
-		settickets(30);
 	}
 	exit();
 

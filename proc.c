@@ -351,7 +351,7 @@ scheduler(void)
         tickcount += p->tickets;
       }
     }
-    
+
     long winner = random_at_most(tickcount);
 
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
@@ -584,7 +584,7 @@ info(int infotype)
 
     release(&ptable.lock);
 
-    cprintf("\n\nprocesses count: %d \n\n", count);
+    cprintf("\n\n  processes count: %d", count);
 
     return 0;
   }
@@ -592,7 +592,7 @@ info(int infotype)
   if(infotype == 2){
 
 
-    cprintf("\n\n system calls count: %d \n\n", curproc->syscallcount);
+    cprintf("\n\n  system calls count: %d", curproc->syscallcount);
 
     return 0;
   }
@@ -602,7 +602,7 @@ info(int infotype)
     int pagecount = curproc->sz / PGSIZE;
 
     // cprintf("\n\n Welcome to the %dth kernel space! \n\n", infotype);
-    cprintf("\n\n pages count: %d \n\n", pagecount);
+    cprintf("\n\n  pages count: %d", pagecount);
 
     return 0;
   }
@@ -618,7 +618,7 @@ settickets(int tickets)
 
   curproc->tickets = tickets;
 
-  cprintf("\n\n assign %d tickets to current process \n\n", tickets);
+  cprintf("\n\n  assign %d tickets to current process", tickets);
 
   return 0;
 }
