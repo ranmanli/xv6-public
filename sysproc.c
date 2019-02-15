@@ -18,6 +18,17 @@ sys_info(void)
 
   return info(type);
 }
+
+int
+sys_settickets(void)
+{
+  int tickets;
+
+  if (argint(0, &tickets) < 0)
+    return -1;
+
+  return settickets(tickets);
+}
 //cs202
 
 int

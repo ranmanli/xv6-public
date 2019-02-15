@@ -51,7 +51,8 @@ struct proc {
   char name[16];               // Process name (debugging)
   // cs202
   // int pagecount;
-  int syscallcount;
+  int tickets;                 //tickets for scheduling
+  int syscallcount;            //the count of system calls
   // cs202
 };
 

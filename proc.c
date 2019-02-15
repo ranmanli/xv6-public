@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "rand.h"  //cs202
 
 struct {
   struct spinlock lock;
@@ -90,6 +91,11 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  // cs202
+  p->tickets = 10;
+  p->syscallcount = 0;
+  // cs202
+
 
   release(&ptable.lock);
 
@@ -220,12 +226,6 @@ fork(void)
 
   release(&ptable.lock);
 
-  // cs202
-  // np->pagecount = 0;
-  // pagecount = 0;
-  np->syscallcount = 0;
-  // cs202
-
   return pid;
 }
 
@@ -338,11 +338,32 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
+    // cs202
+    int tickcount = 0;  //the count of all ticket of processes
+    int ticksum = 0;  //the sum of tickets of checked processes
+
+
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+    
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if (p->state == RUNNABLE){
+        tickcount += p->tickets;
+      }
+    }
+    
+    long winner = random_at_most(tickcount);
+
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 
       if(p->state != RUNNABLE)
+        continue;
+
+      // cs202
+
+      ticksum += p->tickets;
+
+      if(ticksum < winner)
         continue;
 
       // Switch to chosen process.  It is the process's job
@@ -360,6 +381,7 @@ scheduler(void)
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
+      break;
     }
     release(&ptable.lock);
 
@@ -586,5 +608,18 @@ info(int infotype)
   }
 
   return -1;
+}
+
+int 
+settickets(int tickets)
+{
+
+  struct proc *curproc = myproc();
+
+  curproc->tickets = tickets;
+
+  cprintf("\n\n assign %d tickets to current process \n\n", tickets);
+
+  return 0;
 }
 // cs202

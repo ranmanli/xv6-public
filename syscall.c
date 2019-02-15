@@ -105,7 +105,7 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 //  cs202
 extern int sys_info(void);  
-extern int syscallcount;
+extern int sys_settickets(void);
 // cs202
 
 static int (*syscalls[])(void) = {
@@ -131,6 +131,7 @@ static int (*syscalls[])(void) = {
 [SYS_mkdir]   sys_mkdir,
 [SYS_close]   sys_close,
 [SYS_info]   sys_info,  //cs202
+[SYS_settickets]   sys_settickets,  //cs202
 };
 
 void
