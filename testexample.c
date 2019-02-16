@@ -15,16 +15,18 @@ int   Scheduler ( void ){
 
   int  pid;
   int  i,j,k,tick;
+  int tickets[] = {100, 50, 250};
 
-  settickets (60);
-  for  (i  =   2 ; i  >=  0 ; i-- ) {
+  settickets (400);
+  for  (i=0;i<3;i++) {
     pid  =   fork ();
   
     if  (pid  >  0) {
        continue ;
     }
     else if (pid == 0) {
-      tick = 30 - 10 * i;
+      // tick = 30 - 10 * i;
+      tick = tickets[i];
       settickets (tick); 
       for(j = 0 ;j < 50000 ;j ++ ) {
         for(k = 0 ;k < 1000 ;k ++ ) {

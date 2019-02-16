@@ -375,7 +375,7 @@ scheduler(void)
 
     switchuvm(p);
     p->state = RUNNING;
-    if (p->pid > 3)
+    if (p->pid > 2)
       p->runtimes ++;
 
     swtch(&(c->scheduler), p->context);
@@ -638,12 +638,12 @@ info(int infotype)
     acquire(&ptable.lock);
 
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-      if(p->state != UNUSED)
+      if((p->state == RUNNING) | (p->state == RUNNABLE))
         count++;
 
     release(&ptable.lock);
 
-    cprintf("\n  processes count: %d\n", count);
+    cprintf("\n  processes count: %d\n\n", count);
 
     return 0;
   }
@@ -651,7 +651,7 @@ info(int infotype)
   if(infotype == 2){
 
 
-    cprintf("\n  system calls count: %d\n", curproc->syscallcount);
+    cprintf("\n  system calls count: %d\n\n", curproc->syscallcount);
 
     return 0;
   }
@@ -661,7 +661,7 @@ info(int infotype)
     int pagecount = curproc->sz / PGSIZE;
 
     // cprintf("\n\n Welcome to the %dth kernel space! \n\n", infotype);
-    cprintf("\n  pages count: %d\n", pagecount);
+    cprintf("\n  pages count: %d\n\n", pagecount);
 
     return 0;
   }
