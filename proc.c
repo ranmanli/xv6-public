@@ -340,7 +340,7 @@ scheduler(void)
   c->proc = 0;
     
   // stride scheduling
-  struct proc *tempp; // cs202 
+  // struct proc *tempp; // cs202 
   
   for(;;){
     // Enable interrupts on this processor.
@@ -352,7 +352,7 @@ scheduler(void)
     // cs202
     
     // stride scheduling
-    
+    /*
     int minpass = -1;
 
     for(tempp = ptable.proc; tempp < &ptable.proc[NPROC]; tempp++){
@@ -384,11 +384,11 @@ scheduler(void)
     // Process is done running for now.
     // It should have changed its p->state before coming back.
     c->proc = 0;
-    
+    */
     
 
     // lottery scheduling
-    /*
+    
     int tickcount = 0;  //the count of all ticket of processes
     int ticksum = 0;  //the sum of tickets of checked processes
 
@@ -439,7 +439,7 @@ scheduler(void)
       c->proc = 0;
       break;
     }
-    */
+    
 
     release(&ptable.lock);
 
