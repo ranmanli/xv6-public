@@ -98,6 +98,7 @@ found:
   p->syscallcount = 0;
   p->stride = stride1 / p->tickets;
   p->pass = p->stride;
+  p->runtimes = 0;
   // cs202
 
 
@@ -335,39 +336,24 @@ void
 scheduler(void)
 {
   struct proc *p = initproc;
-  struct proc *tempp; // cs202 
   struct cpu *c = mycpu();
   c->proc = 0;
+    
+  // stride scheduling
+  struct proc *tempp; // cs202 
   
   for(;;){
     // Enable interrupts on this processor.
     sti();
 
-    // cs202
-    // lottery scheduling
-    // int tickcount = 0;  //the count of all ticket of processes
-    // int ticksum = 0;  //the sum of tickets of checked processes
-
-
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
     
-    // lottery scheduling
-    /*
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if (p->state == RUNNABLE){
-        tickcount += p->tickets;
-      }
-    }
-
-    long winner = random_at_most(tickcount);
+    // cs202
     
-    */
-
-    // stride schedulingL
+    // stride scheduling
+    
     int minpass = -1;
-
-    //p and tempp. need to run through the queue to find the minimal pass, but also keep the minimal record
 
     for(tempp = ptable.proc; tempp < &ptable.proc[NPROC]; tempp++){
       
@@ -389,6 +375,8 @@ scheduler(void)
 
     switchuvm(p);
     p->state = RUNNING;
+    if (p->pid > 3)
+      p->runtimes ++;
 
     swtch(&(c->scheduler), p->context);
     switchkvm();
@@ -396,9 +384,25 @@ scheduler(void)
     // Process is done running for now.
     // It should have changed its p->state before coming back.
     c->proc = 0;
+    
+    
 
     // lottery scheduling
     /*
+    int tickcount = 0;  //the count of all ticket of processes
+    int ticksum = 0;  //the sum of tickets of checked processes
+
+
+    
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if (p->state == RUNNABLE){
+        tickcount += p->tickets;
+      }
+    }
+
+    long winner = random_at_most(tickcount);
+    // lottery scheduling
+    
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 
       if(p->state != RUNNABLE)
@@ -423,6 +427,9 @@ scheduler(void)
 
       switchuvm(p);
       p->state = RUNNING;
+      if (p->pid > 2)
+        p->runtimes ++;
+
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -657,6 +664,24 @@ info(int infotype)
     cprintf("\n  pages count: %d\n", pagecount);
 
     return 0;
+  }
+
+  if(infotype == 4){
+
+    cprintf("\n--------------------------------------------------\n");
+    acquire(&ptable.lock);
+
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if((p->state == UNUSED) | (p->pid < 3))
+        continue;
+      cprintf("\n#%dth process with %d tickets has run for %d times\n", p->pid, p->tickets, p->runtimes);
+    }
+
+    release(&ptable.lock);
+    cprintf("\n--------------------------------------------------\n");
+
+    return -1;
+
   }
 
   return -1;

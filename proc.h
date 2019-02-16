@@ -55,6 +55,7 @@ struct proc {
   int syscallcount;            //the count of system calls
   int stride;                  //stride of process,inversely proportional to tickets
   int pass;                    //indicate the time process has ran
+  int runtimes;                //keep track of the times process scheduled to run
   // cs202
 };
 

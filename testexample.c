@@ -31,9 +31,10 @@ int   Scheduler ( void ){
           asm ( "nop" );
         }
       }
-      info(1);
-      info(2);
-      info(3);
+      // info(1);
+      // info(2);
+      // info(3);
+      info(4);
       printf (1, "\n  child# %d with %d tickets has finished!\n", getpid(), tick);   
       exit ();
     }
