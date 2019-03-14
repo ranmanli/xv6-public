@@ -216,6 +216,7 @@ fork(void)
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
 
+  // copy the open files to the children
   for(i = 0; i < NOFILE; i++)
     if(curproc->ofile[i])
       np->ofile[i] = filedup(curproc->ofile[i]);
@@ -233,6 +234,58 @@ fork(void)
 
   return pid;
 }
+
+// cs202 lab2
+int
+clone(void *stack, int size)
+{
+  
+  int i, pid;
+  struct proc *np;
+  struct proc *curproc = myproc();
+
+
+  // Allocate process.
+  if((np = allocproc()) == 0){
+    return -1;
+  }
+
+  // share the address space with parents
+  np->pgdir = curproc->pgdir;
+
+  np->sz = curproc->sz;
+  np->parent = curproc;
+  *np->tf = *curproc->tf;
+
+  // get the function pointer
+  int fp = stack + PGSIZE - sizeof(int *);
+  // set the user stack for threads 
+  np->stack = stack;
+  
+
+  // Clear %eax so that fork returns 0 in the child.
+  np->tf->eax = 0;
+
+  // copy the open files to the children
+  for(i = 0; i < NOFILE; i++)
+    if(curproc->ofile[i])
+      np->ofile[i] = filedup(curproc->ofile[i]);
+  np->cwd = idup(curproc->cwd);
+
+  safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+
+  pid = np->pid;
+
+  acquire(&ptable.lock);
+
+  np->state = RUNNABLE;
+
+  release(&ptable.lock);
+
+  return pid;
+  
+}
+// cs202 lab2
 
 // Exit the current process.  Does not return.
 // An exited process remains in the zombie state
@@ -268,7 +321,9 @@ exit(void)
   // Pass abandoned children to init.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->parent == curproc){
+
       p->parent = initproc;
+      
       if(p->state == ZOMBIE)
         wakeup1(initproc);
     }
@@ -302,7 +357,9 @@ wait(void)
         pid = p->pid;
         kfree(p->kstack);
         p->kstack = 0;
+
         freevm(p->pgdir);
+
         p->pid = 0;
         p->parent = 0;
         p->name[0] = 0;

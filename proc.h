@@ -56,6 +56,9 @@ struct proc {
   int stride;                  //stride of process,inversely proportional to tickets
   int pass;                    //indicate the time process has ran
   int runtimes;                //keep track of the times process scheduled to run
+  // lab2
+  void *stack;                 //the user stack of thread
+  uint isthread;               //set to 1 for thread
   // cs202
 };
 

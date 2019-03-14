@@ -31,3 +31,4 @@ SYSCALL(sleep)
 SYSCALL(uptime)
 SYSCALL(info) //cs202
 SYSCALL(settickets) //cs202
+SYSCALL(clone) //cs202

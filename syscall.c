@@ -106,6 +106,8 @@ extern int sys_uptime(void);
 //  cs202
 extern int sys_info(void);  
 extern int sys_settickets(void);
+// lab2
+extern int sys_clone(void);
 // cs202
 
 static int (*syscalls[])(void) = {
@@ -132,6 +134,7 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_info]   sys_info,  //cs202
 [SYS_settickets]   sys_settickets,  //cs202
+[SYS_clone]   sys_clone,  //cs202
 };
 
 void

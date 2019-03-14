@@ -22,3 +22,4 @@
 #define SYS_close  21
 #define SYS_info  22  //cs202
 #define SYS_settickets 23  //cs202
+#define SYS_clone 24  //cs202

@@ -25,6 +25,7 @@ int sleep(int);
 int uptime(void);
 int info(int);  //cs202
 int settickets(int);  //cs202
+int clone(void*, int);  //cs202
 
 // ulib.c
 int stat(const char*, struct stat*);
