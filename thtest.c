@@ -3,12 +3,15 @@
 
 #define PAGESIZE      4096
 
+uint token;
+
 void start_routine(void *arg){
 	// int thisid = getpid();
 	int* gett = (int *)arg;
 
 	sleep(10);
-	printf(1, "sr: arg is %d, pid is %d\n", *gett, getpid());
+	token++;
+	printf(1, "arg is %d, pid : %d, token is %d\n",*gett, getpid(), token);
 	exit();
 }
 
@@ -72,6 +75,8 @@ int main(int argc, char *argv[]){
 	void *stacks[threads];
 	int *args[threads];
 	int i;
+
+	token = 0;
 
 	// prepare the stack
 	for (i = 0; i < threads; i++){

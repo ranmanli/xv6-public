@@ -1,6 +1,8 @@
 #include   "types.h"
 #include   "user.h"
 
+uint token;
+
 int   main (int  argc,  char  * argv[])
 {
   
@@ -16,6 +18,7 @@ int   Scheduler ( void ){
   int  pid;
   int  i,j,k,tick;
   int tickets[] = {100, 50, 250};
+  token = 111;
 
   settickets (400);
   for  (i=0;i<3;i++) {
@@ -33,6 +36,8 @@ int   Scheduler ( void ){
           asm ( "nop" );
         }
       }
+      token++;
+      printf(1, "%d : %d\n", getpid(), token);
       // info(1);
       // info(2);
       // info(3);
@@ -45,6 +50,7 @@ int   Scheduler ( void ){
     }
   }
   if (pid  >  0) {
+    printf(1, "%d : %d\n", getpid(), token);
     for  (i = 0;i < 3;i ++){
        wait (  );
     }
