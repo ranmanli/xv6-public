@@ -12,16 +12,20 @@
 int
 sys_clone(void)
 {
+  int func;
   int stack;
   int size;
 
-  if (argint(0, &stack) < 0)
+  if (argint(0, &func) < 0)
     return -1;
 
-  if (argint(1, &size) < 0)
+  if (argint(1, &stack) < 0)
     return -1;
 
-  return clone((void *) stack, size);
+  if (argint(2, &size) < 0)
+    return -1;
+
+  return clone((void *)func, (void *) stack, size);
 }
 // lab1
 int

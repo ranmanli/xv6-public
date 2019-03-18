@@ -215,6 +215,7 @@ fork(void)
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
+  np->isthread = 0;
 
   // copy the open files to the children
   for(i = 0; i < NOFILE; i++)
@@ -237,12 +238,13 @@ fork(void)
 
 // cs202 lab2
 int
-clone(void *stack, int size)
+clone(void (*func) (void *), void *stack, int size)
 {
   
   int i, pid;
   struct proc *np;
   struct proc *curproc = myproc();
+  int *stack_pointer;
 
 
   // Allocate process.
@@ -257,10 +259,17 @@ clone(void *stack, int size)
   np->parent = curproc;
   *np->tf = *curproc->tf;
 
-  // get the function pointer
-  int fp = stack + PGSIZE - sizeof(int *);
-  // set the user stack for threads 
+  // set the stack
+  stack_pointer = stack + PGSIZE - 2 * sizeof(int *);
+  *stack_pointer = 0xFFFFFFFF;
+
+  np->tf->eip = (int)func;
+  np->tf->esp = (int)stack + PGSIZE - 2 * sizeof(int *);
+  np->tf->ebp = np->tf->esp;
+
+  // set the attributes for threads 
   np->stack = stack;
+  np->isthread = 1;
   
 
   // Clear %eax so that fork returns 0 in the child.
@@ -321,11 +330,22 @@ exit(void)
   // Pass abandoned children to init.
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->parent == curproc){
-
-      p->parent = initproc;
+      if (p->isthread == 1){
+        // void **jstack;
+        // *jstack = p->stack;
+        // free(p->stack);
+        // kfree(p->kstack);
+        // p->kstack = 0;
+        kfree(p->kstack);
+        p->kstack = 0;
+        p->state = UNUSED;
+      }
+      else{
+        p->parent = initproc;
       
-      if(p->state == ZOMBIE)
-        wakeup1(initproc);
+        if(p->state == ZOMBIE)
+          wakeup1(initproc);
+      }
     }
   }
 
@@ -355,11 +375,13 @@ wait(void)
       if(p->state == ZOMBIE){
         // Found one.
         pid = p->pid;
-        kfree(p->kstack);
-        p->kstack = 0;
-
-        freevm(p->pgdir);
-
+// cs202 lab2
+        if(p->isthread != 1){
+          kfree(p->kstack);
+          p->kstack = 0;
+          freevm(p->pgdir);
+        }
+// cs202 lab2
         p->pid = 0;
         p->parent = 0;
         p->name[0] = 0;
@@ -445,7 +467,7 @@ scheduler(void)
     
 
     // lottery scheduling
-    
+    /*
     int tickcount = 0;  //the count of all ticket of processes
     int ticksum = 0;  //the sum of tickets of checked processes
 
@@ -459,6 +481,7 @@ scheduler(void)
 
     long winner = random_at_most(tickcount);
     // lottery scheduling
+    */
     
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
 
@@ -468,10 +491,10 @@ scheduler(void)
       // cs202
 
       
-      ticksum += p->tickets;
+      // ticksum += p->tickets;
 
-      if(ticksum < winner)
-        continue;
+      // if(ticksum < winner)
+        // continue;
       
       
 
