@@ -184,7 +184,7 @@ UPROGS=\
 	_zombie\
 	_getinfo\
 	_testexample\
-	_thtest\
+	_frisbee_spin\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
