@@ -185,6 +185,7 @@ UPROGS=\
 	_getinfo\
 	_testexample\
 	_frisbee_spin\
+	_testmcs\
 
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
