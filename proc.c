@@ -306,6 +306,7 @@ exit(void)
   struct proc *p;
   int fd;
 
+
   if(curproc == initproc)
     panic("init exiting");
 
@@ -342,9 +343,9 @@ exit(void)
       }
       else{
         p->parent = initproc;
-      
         if(p->state == ZOMBIE)
           wakeup1(initproc);
+      
       }
     }
   }
@@ -376,9 +377,9 @@ wait(void)
         // Found one.
         pid = p->pid;
 // cs202 lab2
+        kfree(p->kstack);
+        p->kstack = 0;
         if(p->isthread != 1){
-          kfree(p->kstack);
-          p->kstack = 0;
           freevm(p->pgdir);
         }
 // cs202 lab2
@@ -414,12 +415,9 @@ wait(void)
 void
 scheduler(void)
 {
-  struct proc *p = initproc;
+  struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
-    
-  // stride scheduling
-  // struct proc *tempp; // cs202 
   
   for(;;){
     // Enable interrupts on this processor.
@@ -427,89 +425,16 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    
-    // cs202
-    
-    // stride scheduling
-    /*
-    int minpass = -1;
-
-    for(tempp = ptable.proc; tempp < &ptable.proc[NPROC]; tempp++){
-      
-      if(tempp->state != RUNNABLE){
-        continue;
-      }
-
-      if( (minpass < 0) | (tempp->pass < minpass)){
-        minpass = tempp->pass;
-        p = tempp;
-      }
-      
-    }
-    // Switch to chosen process.  It is the process's job
-    // to release ptable.lock and then reacquire it
-    // before jumping back to us.
-    c->proc = p;
-
-
-    switchuvm(p);
-    p->state = RUNNING;
-    if (p->pid > 2)
-      p->runtimes ++;
-
-    swtch(&(c->scheduler), p->context);
-    switchkvm();
-
-    // Process is done running for now.
-    // It should have changed its p->state before coming back.
-    c->proc = 0;
-    */
-    
-
-    // lottery scheduling
-    /*
-    int tickcount = 0;  //the count of all ticket of processes
-    int ticksum = 0;  //the sum of tickets of checked processes
-
-
-    
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if (p->state == RUNNABLE){
-        tickcount += p->tickets;
-      }
-    }
-
-    long winner = random_at_most(tickcount);
-    // lottery scheduling
-    */
-    
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-
       if(p->state != RUNNABLE)
         continue;
-
-      // cs202
-
-      
-      // ticksum += p->tickets;
-
-      // if(ticksum < winner)
-        // continue;
-      
-      
-
 
       // Switch to chosen process.  It is the process's job
       // to release ptable.lock and then reacquire it
       // before jumping back to us.
       c->proc = p;
-
-
       switchuvm(p);
       p->state = RUNNING;
-      if (p->pid > 2)
-        p->runtimes ++;
-
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
@@ -517,12 +442,8 @@ scheduler(void)
       // Process is done running for now.
       // It should have changed its p->state before coming back.
       c->proc = 0;
-      break;
     }
-    
-
     release(&ptable.lock);
-
   }
 }
 
