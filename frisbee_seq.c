@@ -4,13 +4,14 @@
 
 #define PAGESIZE      4096
 
-struct myspinlock {
-  uint locked;       // Is the lock held?
+struct myseqlock {
+  uint locked;      
+  volatile uint sequence;
 };
 
 struct frisbee {
 	uint value;
-	struct myspinlock lock;
+	struct myseqlock lock;
 	uint count;
 };
 
@@ -19,43 +20,68 @@ uint passes;
 struct frisbee token;
 
 
-void init_myspinlock(struct myspinlock *lk){
+void init_myseqlock(struct myseqlock *lk){
 	lk->locked = 0;
+	lk->sequence = 0;
 }
 
-void acquire_spinlock(struct myspinlock *lk){
+void acquire_seqlock_write(struct myseqlock *lk){
+	lk->sequence++;
 	while(xchg(&lk->locked, 1) != 0)
 		;
 	__sync_synchronize();
 }
 
-void release_spinlock(struct myspinlock *lk){
+void release_seqlock_write(struct myseqlock *lk){
 	__sync_synchronize();
+	lk->sequence++;
 	asm volatile("movl $0, %0" : "+m" (lk->locked) : );
+}
+
+uint acquire_seqlock_read(struct myseqlock *lk){
+	while((lk->sequence%2) != 0)
+		;
+	
+	return lk->sequence;
 }
 
 void start_routine(void *arg){
 	int threadid = *(int *)arg;
 	int next;
+	uint END = 0;
+	uint flag = 0;
+	uint seqb;
+	uint thisvalue, thiscount;
 	if(threadid < threads-1)
 		next = threadid + 1;
 	else
 		next = 0;
 
-	while(token.count < passes){
-		if(token.count > passes){
-			break;
-		}
-		acquire_spinlock(&token.lock);
+	do{
 
-		if(token.value == threadid && token.count <= passes){
+		do{
+			seqb = acquire_seqlock_read(&token.lock);
+			thiscount = token.count;
+			thisvalue = token.value;
+			if(thiscount > passes){
+				END = 1;
+				break;
+			}
+			if(thisvalue == threadid && thiscount <= passes){
+				flag = 1;
+			}
+		}while(seqb != token.lock.sequence);
+
+		if(flag){
+			acquire_seqlock_write(&token.lock);
 			token.value = next;
 			printf(1, "Pass number no: %d, Thread %d is passing the token to thread %d\n",token.count, threadid, next);	
 			token.count++;
+			flag = 0;
+			release_seqlock_write(&token.lock);
 		}
-		release_spinlock(&token.lock);
 		
-	}
+	}while(!END);
 
 
 	exit();
@@ -63,7 +89,7 @@ void start_routine(void *arg){
 
 
 int main(int argc, char *argv[]){
-	
+
 	int start, finish;
 	start = uptime();
 
@@ -83,7 +109,7 @@ int main(int argc, char *argv[]){
 	int i;
 
 	token.count = 1;
-	init_myspinlock(&token.lock);
+	init_myseqlock(&token.lock);
 	token.value = 0;
 
 	// prepare the stack
@@ -114,3 +140,5 @@ int main(int argc, char *argv[]){
 
 	return 0;
 }
+
+
