@@ -37,7 +37,6 @@ void release_spinlock(struct myspinlock *lk){
 void start_routine(void *arg){
 	int* threadid = (int *)arg;
 	int next;
-	sleep(10);
 	if(*threadid < threads-1)
 		next = *threadid + 1;
 	else
